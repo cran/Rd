@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `setup-set_old_classes.R`')
-#line 23 "R/setup-set_old_classes.R"
+#line 24 "R/setup-set_old_classes.R"
 test_that('Old classes', {#@testing Old classes
     expect_true(is(Rd_text('text'), 'Rd_string'))
     expect_true(is(Rd_text('text'), 'Rd_object'))

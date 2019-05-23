@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `canon.R`')
-#line 49 "C:/rdtf/Rd/R/canon.R"
+#line 49 "R/canon.R"
 test_that('Rd_canonize', {#@testing
     rd <- Rd_text("a\nb\nc\n")
     expect_is(rd, 'Rd_string')
@@ -43,7 +43,7 @@ test_that('Rd_canonize', {#@testing
     expect_true(is_Rd_string(val[[1]], 'TEXT'))
     expect_length(val[[1]], 1L)
 })
-#line 89 "C:/rdtf/Rd/R/canon.R"
+#line 89 "R/canon.R"
 test_that('Rd_canonize with output from parse_Rd', {#@testing Rd_canonize with output from parse_Rd
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd'))
     txt <- Rd_rm_srcref(txt)
@@ -72,7 +72,7 @@ test_that('Rd_canonize with output from parse_Rd', {#@testing Rd_canonize with o
     expect_identical(Rd_canonize_text(x)[[1]], Rd_tag('\\item'))
     expect_identical(Rd_canonize_text(x)[[2]], Rd_text(' content'))
 })
-#line 117 "C:/rdtf/Rd/R/canon.R"
+#line 117 "R/canon.R"
 test_that('Rd_canonize with unclassed arguments', {#@testing Rd_canonize with unclassed arguments
     x <- unclass(Rd_text('test'))
     expect_is(x, 'character')
@@ -99,7 +99,7 @@ test_that('Rd_canonize with unclassed arguments', {#@testing Rd_canonize with un
     expect_Rd_tag(unclass(val.y)[[1]], '\\bold')
     expect_Rd_string(unclass(val.y)[[1]][[1]], 'TEXT')
 })
-#line 184 "C:/rdtf/Rd/R/canon.R"
+#line 176 "R/canon.R"
 test_that('Rd_canonize_text', {#@testing
     expect_error(Rd_canonize_text(Rd_text('\n')))
     expect_identical(Rd_canonize_text(Rd_text('\n'), .check=FALSE), Rd_text('\n'))
@@ -120,7 +120,7 @@ test_that('Rd_canonize_text', {#@testing
     val <- Rd_canonize_text(cl(c(x, .Rd(Rd_text('\n'))), 'Rd'))
     expect_identical(Rd_unclass(val), Rd_unclass(reclaimed))
 })
-#line 227 "C:/rdtf/Rd/R/canon.R"
+#line 227 "R/canon.R"
 test_that('Rd_canonize_code', {#@testing
     x <- Rd_tag( "\\usage"
                , Rd_rcode("\n")
@@ -143,4 +143,19 @@ test_that('Rd_canonize_code', {#@testing
               )
     expect_error(Rd_canonize_code(bad)
                 , "RCODE type strings may not appear in a  container with any other type\\.")
+})
+#line 250 "R/canon.R"
+test_that('code with tags.', {#@testing code with tags.
+    rd <- .Rd( Rd_rcode('\n')
+             , Rd_tag("\\S4method", Rd("name"), Rd("signature"))
+             , Rd_rcode("(x, ...)")
+             , Rd_rcode('\n')
+             )
+    val <- Rd_canonize_code(rd)
+    expect_identical( val
+                    , .Rd( Rd_rcode('\n')
+                         , Rd_tag("\\S4method", Rd("name"), Rd("signature"))
+                         , Rd_rcode("(x, ...)\n")
+                         ))
+
 })

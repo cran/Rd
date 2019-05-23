@@ -5,7 +5,9 @@
 #'
 #' These functions can be used to extract or subset elements of
 #' Rd lists, either bare `Rd` containers or `Rd_tag` objects.
-#' The `[[` operator wraps `Rd_get_element` and `[` wraps
+#' The `[[` operator performs classification of output.
+#' `Rd_get_element` acts as `[[` but will also accept tags to
+#' search for.  The `[` operator wraps
 #' `Rd_subset`, respectively.
 #'
 #' @param x Either an `Rd` or `Rd_tag` object.
@@ -28,6 +30,9 @@
 #' @seealso [base::Extract]
 NULL
 
+
+#' @rdname Rd-extraction
+#' @export
 Rd_get_element <- function(x, ..., drop=TRUE){
     if (...length() != 1L)
         pkg_error( "incorrect number of subscripts"
@@ -111,10 +116,21 @@ if(FALSE){#@testing Rd_get_element fringe cases
 
 #' @rdname Rd-extraction
 #' @export
-`[[.Rd_tag` <- function(x, ...) Rd_get_element(x, ...)
+`[[.Rd_tag` <- function(x, ...){
+    val <- NextMethod()
+    tag <- attr(val, 'Rd_tag')
+    if (is.list(val)){
+        if (is.null(tag)) class(val) <- 'Rd'
+        else if(substr(tag,1,1)=='\\') class(val) <- 'Rd_tag'
+    } else
+    if ( is.character(val)
+      && tag %in% c("TEXT", "RCODE", "VERB", "COMMENT", "UNKNOWN", "LIST")
+       ) class(val) <- 'Rd_string'
+    val
+}
 #' @rdname Rd-extraction
 #' @export
-`[[.Rd` <- function(x, ...) Rd_get_element(x, ...)
+`[[.Rd` <- `[[.Rd_tag`
 if(FALSE){#@testing [[.Rd & [.Rd
     test.file <- system.file("examples", "Normal.Rd", package = 'Rd')
     txt <- tools::parse_Rd(test.file)
@@ -122,17 +138,19 @@ if(FALSE){#@testing [[.Rd & [.Rd
 
     expect_is_exactly(txt, 'Rd')
 
-    expect_is_exactly(txt[['\\arguments']], 'Rd_tag')
-    expect_Rd_tag(txt[['\\arguments']], '\\arguments')
-    expect_Rd_string(txt[['\\arguments']][[1]], 'TEXT')
-    expect_Rd_string(txt[['\\arguments']][[2]], 'TEXT')
-    expect_Rd_tag(txt[['\\arguments']][[3]], '\\item')
-    expect_Rd_bare(txt[['\\arguments']][[c(3,1)]])
-    expect_Rd_string(txt[['\\arguments']][[c(3,1,1)]], 'TEXT')
-    expect_Rd_string(txt[['\\arguments']][[c(3,2,1)]], 'TEXT')
+    i <- which(sapply(txt, get_Rd_tag) == '\\arguments' )
 
-    expect_Rd_tag(txt[['\\arguments']][[3L]], '\\item')
-    expect_Rd_bare(txt[['\\arguments']][[3L]][[1L]])
+    expect_is_exactly(txt[[i]], 'Rd_tag')
+    expect_Rd_tag(txt[[i]], '\\arguments')
+    expect_Rd_string(txt[[i]][[1]], 'TEXT')
+    expect_Rd_string(txt[[i]][[2]], 'TEXT')
+    expect_Rd_tag(txt[[i]][[3]], '\\item')
+    expect_Rd_bare(txt[[i]][[c(3,1)]])
+    expect_Rd_string(txt[[i]][[c(3,1,1)]], 'TEXT')
+    expect_Rd_string(txt[[i]][[c(3,2,1)]], 'TEXT')
+
+    expect_Rd_tag(txt[[i]][[3L]], '\\item')
+    expect_Rd_bare(txt[[i]][[3L]][[1L]])
 
     expect_Rd_string(txt[[2]], "TEXT")
     expect_Rd_string(txt[[c(48, 11)]], "TEXT")
@@ -198,7 +216,8 @@ if(FALSE){#@testing `[.Rd` and `[.Rd_tag`
     txt <- Rd_rm_srcref(tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd')))
     expect_Rd_bare(txt)
 
-    args <- txt[['\\arguments']]
+    i <- which(sapply(txt, get_Rd_tag) == '\\arguments' )
+    args <- txt[[i]]
     expect_Rd_tag(args, '\\arguments')
     expect_Rd_tag(args[1:7], '\\arguments')
     expect_length(args[1:7], 7)
@@ -265,9 +284,6 @@ if(FALSE){#@testing
 #' @export
 format.Rd <- function(x, ...)collapse0(as.character(x, ...))
 
-# #' @export
-# as.character.Rd_tag <- function(x, ...)as.character(.Rd(x), ...)
-
 #' @export
 format.Rd_tag <- function(x, ...)collapse0(as.character(.Rd(x), ...))
 
@@ -276,7 +292,7 @@ print.Rd_tag <- function(x, ...) cat(as.character(.Rd(x), ...), sep='', collapse
 
 if(FALSE){#@testing as.character, format, and print.
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd'))
-    desc <- txt[["\\description"]]
+    desc <- Rd_get_element(txt, "\\description")
 
     expect_Rd_tag(desc, '\\description')
     expect_is_exactly(desc, 'Rd_tag')
@@ -304,4 +320,34 @@ if(FALSE){#@testing as.character, format, and print.
                    "  and standard deviation equal to \\code{sd}." %\%
                    "}"
                  , fixed=TRUE)
+}
+
+#' @export
+compare.Rd <- function(x, y, ..., ignore.srcref = TRUE, max_diffs = 9){
+    if (ignore.srcref){
+        x <- Rd_rm_srcref(x)
+        y <- Rd_rm_srcref(y)
+    }
+    same <- all.equal(x,y,...)
+    if (length(same) > max_diffs) {
+        same <- c(same[1:max_diffs], "...")
+    }
+    cl(list( equal = identical(same, TRUE)
+           , message = collapse(as.character(same), '\n')
+           ), "comparison")
+}
+#' @export
+compare.Rd_tag <- compare.Rd
+if(FALSE){#@testing
+    constructed <- Rd_name("test")
+    txt <- "\\name{test}"
+    parsed <- tools::parse_Rd(textConnection(txt))[[1]]
+    expect_true(is_Rd_tag(parsed, "\\name"))
+
+    expect_identical( compare.Rd(constructed, parsed)
+                    , cl(list(equal= TRUE, message= "TRUE"), 'comparison')
+                    )
+    val <- compare.Rd(constructed, parsed, ignore.srcref = FALSE)
+    expect_false(val$equal)
+    expect_equal(constructed, parsed)
 }

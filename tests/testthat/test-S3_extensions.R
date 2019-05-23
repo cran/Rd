@@ -2,7 +2,7 @@
 #! Changes will be overwritten.
 
 context('tests extracted from file `S3_extensions.R`')
-#line 56 "R/S3_extensions.R"
+#line 56 "C:/rdtf/Rd/R/S3_extensions.R"
 test_that('Rd_get_element by the numbers', {#@testing Rd_get_element by the numbers
     x <- .Rd( Rd_comment("% a comment")
             , Rd_text("\n")
@@ -26,7 +26,7 @@ test_that('Rd_get_element by the numbers', {#@testing Rd_get_element by the numb
     expect_true(is_Rd_string(Rd_get_element(Rd_unclass(x), c(5,2,1)), strict = TRUE))
     expect_is_exactly(Rd_get_element(Rd_unclass(x), c(5,2,1,1)), 'character')
 })
-#line 79 "R/S3_extensions.R"
+#line 79 "C:/rdtf/Rd/R/S3_extensions.R"
 test_that('Rd_get_element by the tag', {#@testing Rd_get_element by the tag
     test.file <- system.file("examples", "Normal.Rd", package = 'Rd')
     txt <- tools::parse_Rd(test.file)
@@ -48,7 +48,7 @@ test_that('Rd_get_element by the tag', {#@testing Rd_get_element by the tag
                 , class = "Rd::Rd_get_element-error-multiple_found"
                 )
 })
-#line 100 "R/S3_extensions.R"
+#line 100 "C:/rdtf/Rd/R/S3_extensions.R"
 test_that('Rd_get_element fringe cases', {#@testing Rd_get_element fringe cases
     bad.rd <- s(list( a <- Rd_comment("% This is not a valid Rd")
                     , b <- Rd_text('\n')
@@ -60,7 +60,7 @@ test_that('Rd_get_element fringe cases', {#@testing Rd_get_element fringe cases
     expect_identical(Rd_get_element(bad.rd, 3), c)
     expect_identical(Rd_get_element(bad.rd, 'bad logical'), c)
 })
-#line 118 "R/S3_extensions.R"
+#line 129 "C:/rdtf/Rd/R/S3_extensions.R"
 test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
     test.file <- system.file("examples", "Normal.Rd", package = 'Rd')
     txt <- tools::parse_Rd(test.file)
@@ -68,22 +68,24 @@ test_that('[[.Rd & [.Rd', {#@testing [[.Rd & [.Rd
 
     expect_is_exactly(txt, 'Rd')
 
-    expect_is_exactly(txt[['\\arguments']], 'Rd_tag')
-    expect_Rd_tag(txt[['\\arguments']], '\\arguments')
-    expect_Rd_string(txt[['\\arguments']][[1]], 'TEXT')
-    expect_Rd_string(txt[['\\arguments']][[2]], 'TEXT')
-    expect_Rd_tag(txt[['\\arguments']][[3]], '\\item')
-    expect_Rd_bare(txt[['\\arguments']][[c(3,1)]])
-    expect_Rd_string(txt[['\\arguments']][[c(3,1,1)]], 'TEXT')
-    expect_Rd_string(txt[['\\arguments']][[c(3,2,1)]], 'TEXT')
+    i <- which(sapply(txt, get_Rd_tag) == '\\arguments' )
 
-    expect_Rd_tag(txt[['\\arguments']][[3L]], '\\item')
-    expect_Rd_bare(txt[['\\arguments']][[3L]][[1L]])
+    expect_is_exactly(txt[[i]], 'Rd_tag')
+    expect_Rd_tag(txt[[i]], '\\arguments')
+    expect_Rd_string(txt[[i]][[1]], 'TEXT')
+    expect_Rd_string(txt[[i]][[2]], 'TEXT')
+    expect_Rd_tag(txt[[i]][[3]], '\\item')
+    expect_Rd_bare(txt[[i]][[c(3,1)]])
+    expect_Rd_string(txt[[i]][[c(3,1,1)]], 'TEXT')
+    expect_Rd_string(txt[[i]][[c(3,2,1)]], 'TEXT')
+
+    expect_Rd_tag(txt[[i]][[3L]], '\\item')
+    expect_Rd_bare(txt[[i]][[3L]][[1L]])
 
     expect_Rd_string(txt[[2]], "TEXT")
     expect_Rd_string(txt[[c(48, 11)]], "TEXT")
 })
-#line 155 "R/S3_extensions.R"
+#line 168 "C:/rdtf/Rd/R/S3_extensions.R"
 test_that('Rd_subset', {#@testing Rd_subset
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd'))
     expect_true(is_valid_Rd_list(txt))
@@ -104,7 +106,7 @@ test_that('Rd_subset', {#@testing Rd_subset
 
     expect_true(all(purrr::map_chr(Rd_subset(args, "\\item"), get_Rd_tag) == '\\item'))
 })
-#line 179 "R/S3_extensions.R"
+#line 192 "C:/rdtf/Rd/R/S3_extensions.R"
 test_that('`[.Rd` and `[.Rd_tag`', {#@testing `[.Rd` and `[.Rd_tag`
     txt <- Rd_rm_srcref(tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd')))
     expect_Rd_bare(txt)
@@ -119,12 +121,13 @@ test_that('`[.Rd` and `[.Rd_tag`', {#@testing `[.Rd` and `[.Rd_tag`
     expect_identical(txt[character(0)], Rd())
     expect_identical(txt[integer(0)], Rd())
 })
-#line 197 "R/S3_extensions.R"
+#line 210 "C:/rdtf/Rd/R/S3_extensions.R"
 test_that('`[.Rd` and `[.Rd_tag`', {#@testing `[.Rd` and `[.Rd_tag`
     txt <- Rd_rm_srcref(tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd')))
     expect_Rd_bare(txt)
 
-    args <- txt[['\\arguments']]
+    i <- which(sapply(txt, get_Rd_tag) == '\\arguments' )
+    args <- txt[[i]]
     expect_Rd_tag(args, '\\arguments')
     expect_Rd_tag(args[1:7], '\\arguments')
     expect_length(args[1:7], 7)
@@ -139,7 +142,7 @@ test_that('`[.Rd` and `[.Rd_tag`', {#@testing `[.Rd` and `[.Rd_tag`
     expect_equal(args[character(0)], Rd_tag("\\arguments"))
     expect_equal(args[  integer(0)], Rd_tag("\\arguments"))
 })
-#line 232 "R/S3_extensions.R"
+#line 246 "C:/rdtf/Rd/R/S3_extensions.R"
 test_that('Rd_c', {#@testing
     x <- .Rd(Rd_text('testing'))
 
@@ -156,7 +159,7 @@ test_that('Rd_c', {#@testing
                     , .Rd(Rd_text('  '), Rd_text('name'), Rd_text('\n'))
                     )
 })
-#line 257 "R/S3_extensions.R"
+#line 271 "C:/rdtf/Rd/R/S3_extensions.R"
 test_that('c.Rd_string', {#@testing
     expect_true('c.Rd_string' %in% as.character(methods('c')))
     expect_identical(c(Rd_text("hello"), ' ', Rd_text("world"))
@@ -164,10 +167,10 @@ test_that('c.Rd_string', {#@testing
     expect_identical(c(Rd_text("hello"), ' ', Rd_rcode("world"))
                     , c("hello", ' ', "world"))
 })
-#line 277 "R/S3_extensions.R"
+#line 288 "C:/rdtf/Rd/R/S3_extensions.R"
 test_that('as.character, format, and print.', {#@testing as.character, format, and print.
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd'))
-    desc <- txt[["\\description"]]
+    desc <- Rd_get_element(txt, "\\description")
 
     expect_Rd_tag(desc, '\\description')
     expect_is_exactly(desc, 'Rd_tag')
@@ -195,4 +198,18 @@ test_that('as.character, format, and print.', {#@testing as.character, format, a
                    "  and standard deviation equal to \\code{sd}." %\%
                    "}"
                  , fixed=TRUE)
+})
+#line 336 "C:/rdtf/Rd/R/S3_extensions.R"
+test_that('compare.Rd_tag', {#@testing
+    constructed <- Rd_name("test")
+    txt <- "\\name{test}"
+    parsed <- tools::parse_Rd(textConnection(txt))[[1]]
+    expect_true(is_Rd_tag(parsed, "\\name"))
+
+    expect_identical( compare.Rd(constructed, parsed)
+                    , cl(list(equal= TRUE, message= "TRUE"), 'comparison')
+                    )
+    val <- compare.Rd(constructed, parsed, ignore.srcref = FALSE)
+    expect_false(val$equal)
+    expect_equal(constructed, parsed)
 })

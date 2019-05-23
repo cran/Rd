@@ -153,8 +153,8 @@ test_that('is_Rd_newline', {#@testing
 test_that('Rd_spans_multiple_lines', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd'))
     expect_true(Rd_spans_multiple_lines(txt))
-    expect_true(Rd_spans_multiple_lines(txt[['\\arguments']]))
-    expect_false(Rd_spans_multiple_lines(txt[['\\arguments']][[3L]]))
+    expect_true(Rd_spans_multiple_lines(Rd_get_element(txt, '\\arguments')))
+    expect_false(Rd_spans_multiple_lines(Rd_get_element(txt, '\\arguments')[[3L]]))
 
     expect_false(Rd_spans_multiple_lines(Rd_text("hello world\n")))
     expect_true(Rd_spans_multiple_lines(Rd_text("hello\nworld\n")))
@@ -168,20 +168,21 @@ test_that('Rd_spans_multiple_lines', {#@testing
            , Rd_rcode('\n'))
     expect_true(Rd_spans_multiple_lines(x))
 })
-#line 314 "R/Class-Rd.R"
+#line 316 "R/Class-Rd.R"
 test_that('Rd_ends_with_newline', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd'))
     expect_true(Rd_ends_with_newline(txt))
 
-    x <- txt[[38]]
+    x <- Rd_get_element(txt, "\\usage")
+    expect_Rd_tag(x, "\\usage")
 
     expect_true(Rd_ends_with_newline(x))
-    expect_false(Rd_ends_with_newline(x, TRUE))
+    expect_false(Rd_ends_with_newline(Rd(x)))
 })
-#line 328 "R/Class-Rd.R"
+#line 331 "R/Class-Rd.R"
 test_that('Rd_starts_with_newline', {#@testing
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd'))
     expect_false(Rd_starts_with_newline(txt))
-    expect_true(Rd_starts_with_newline(txt[['\\arguments']]))
-    expect_false(Rd_starts_with_newline(txt[['\\arguments']], TRUE))
+    expect_true(Rd_starts_with_newline(Rd_get_element(txt, '\\arguments')))
+    expect_false(Rd_starts_with_newline(Rd(Rd_get_element(txt, '\\arguments'))))
 })

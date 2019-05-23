@@ -3,6 +3,7 @@
 #' @importFrom assertthat is.count is.flag is.string see_if validate_that
 #' @importFrom methods is
 #' @importFrom utils bibentry person tail head
+#' @importFrom testthat compare
 # @importFrom testextra are all_inherit is_exactly class0
 
 
@@ -38,3 +39,8 @@ if(FALSE){#@testing Old classes
     expect_false(is(Rd_tag('\\strong', Rd_text('text'), .check=FALSE), 'Rd'))
     expect_false(is(Rd_tag('\\strong', Rd_text('text'), .check=FALSE), 'list'))
 }
+
+setAs('Rd_tag', 'Rd', function(from){
+    assert_that(is_valid_Rd_list(from))
+    .Rd(from)
+})

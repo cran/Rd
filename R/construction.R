@@ -154,6 +154,22 @@ if(FALSE){#@testing check_content(., .check=TRUE)
                 , "Elements 1, 2 of elements.are.valid are not true")
 }
 
+add_newlines <- function(content){
+    if (!is_Rd(content)) class(content) <- 'Rd'
+    if (Rd_spans_multiple_lines(content)){
+        if(all_are_exactly(content, 'Rd')){
+            for (i in seq_along(content))
+                content[[i]] <- Recall(content[[i]])
+        } else {
+            type <- if (get_Rd_tag(content[[1]]) == 'RCODE') 'RCODE' else 'TEXT'
+            nl <- .Rd(Rd_string('\n', type))
+            if (!Rd_starts_with_newline(content)) content <- Rd_canonize_text(Rd_c(nl, content))
+            if (!Rd_ends_with_newline(content)) content <- Rd_canonize_text(Rd_c(content, nl))
+        }
+    }
+    return(content)
+}
+
 
 # String Construction -----------------------------------------------------------------
 #' @name Rd_string_creation
@@ -436,14 +452,9 @@ function( tag
     if (length(opt))
         assert_that(is_valid_Rd_object(opt))
     content <- cl(content, 'Rd')
-    if (Rd_spans_multiple_lines(cl(content, 'Rd'))) {
-        type <- if (get_Rd_tag(content[[1]]) == 'RCODE') 'RCODE' else 'TEXT'
-        nl <- .Rd(Rd_string('\n', type))
-        if (!Rd_starts_with_newline(content)) content <- Rd_c(nl, content)
-        if (!Rd_ends_with_newline(content)) content <- Rd_c(content, nl)
-        if (indent)
-            content <- Rd_indent(content, indent.with = indent.with)
-    }
+    content <- add_newlines(content)
+    if (indent)
+        content <- Rd_indent(content, indent.with = indent.with)
     val <- s( content
             , Rd_tag = tag
             , class  = 'Rd_tag'
@@ -517,9 +528,21 @@ if(FALSE){#@testing validObject(Rd_tag)
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd'))
     expect_is(txt, 'Rd')
 
-    desc <- txt[['\\description']]
+    desc <- Rd_get_element(txt, '\\description')
     expect_Rd_tag(desc, '\\description')
     expect_true(is_valid_Rd_object(desc))
     expect_true(validObject(desc, TRUE))
 }
-
+if(FALSE){#@testing Rd_tag edge case all elements are Rd.
+    content <- collapse(strwrap(stringi::stri_rand_lipsum(1), 72), '\n')
+    rd <- Rd_tag( "\\section"
+                , content = list( Rd("Title")
+                                , Rd(content)
+                                )
+                )
+    expect_Rd_tag(rd, '\\section')
+    expect_Rd_bare(rd[[1]])
+    expect_Rd_bare(rd[[2]])
+    expect_true(head(rd[[2]], 1) == '\n')
+    expect_true(tail(rd[[2]], 1) != '\n')
+}

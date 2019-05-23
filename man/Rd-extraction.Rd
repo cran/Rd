@@ -2,6 +2,7 @@
 % Please edit documentation in R/S3_extensions.R
 \name{Rd-extraction}
 \alias{Rd-extraction}
+\alias{Rd_get_element}
 \alias{[[.Rd_tag}
 \alias{[[.Rd}
 \alias{Rd_subset}
@@ -11,9 +12,13 @@
 
 These functions can be used to extract or subset elements of
 Rd lists, either bare \code{Rd} containers or \code{Rd_tag} objects.
-The \code{[[} operator wraps \code{Rd_get_element} and \code{[} wraps
+The \code{[[} operator performs classification of output.
+\code{Rd_get_element} acts as \code{[[} but will also accept tags to
+search for.  The \code{[} operator wraps
 \code{Rd_subset}, respectively.}
 \usage{
+Rd_get_element(x, ..., drop = TRUE)
+
 \method{[[}{Rd_tag}(x, ...)
 
 \method{[[}{Rd}(x, ...)
@@ -28,6 +33,12 @@ Rd_subset(x, i, ..., drop = FALSE)
 \item{x}{Either an \code{Rd} or \code{Rd_tag} object.}
 
 \item{...}{Must be empty.}
+
+\item{drop}{For matrices and arrays.  If \code{TRUE} the result is
+    coerced to the lowest possible dimension (see the examples).  This
+    only works for extracting elements, not for the replacement.  See
+    \code{\link{drop}} for further details.
+  }
 
 \item{i}{
     indices specifying elements to extract or replace.  Indices are
@@ -51,12 +62,6 @@ Rd_subset(x, i, ..., drop = FALSE)
 
     An index value of \code{NULL} is treated as if it were \code{integer(0)}.
   }
-
-\item{drop}{For matrices and arrays.  If \code{TRUE} the result is
-    coerced to the lowest possible dimension (see the examples).  This
-    only works for extracting elements, not for the replacement.  See
-    \code{\link{drop}} for further details.
-  }
 }
 \value{
 \itemize{
@@ -78,7 +83,9 @@ Extract elements from Rd containers
 
 These functions can be used to extract or subset elements of
 Rd lists, either bare \code{Rd} containers or \code{Rd_tag} objects.
-The \code{[[} operator wraps \code{Rd_get_element} and \code{[} wraps
+The \code{[[} operator performs classification of output.
+\code{Rd_get_element} acts as \code{[[} but will also accept tags to
+search for.  The \code{[} operator wraps
 \code{Rd_subset}, respectively.
 }
 \seealso{

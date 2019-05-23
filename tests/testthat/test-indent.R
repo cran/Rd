@@ -52,7 +52,7 @@ test_that('Rd_clean_indent expected output', {#@testing Rd_clean_indent expected
     expect_identical(Rd_clean_indent(Rd(Rd_rcode('  '))), .Rd(Rd_rcode('  ')))
     expect_identical(Rd_clean_indent(Rd_rcode('  ')), .Rd(Rd_rcode('  ')))
 })
-#line 161 "R/indent.R"
+#line 162 "R/indent.R"
 test_that('Rd_indent for Rd_tag', {#@testing Rd_indent for Rd_tag
     rd <- Rd_alias('jane doe')
     expect_identical(Rd_indent(rd, .Rd.default.indent), rd)
@@ -63,8 +63,9 @@ test_that('Rd_indent for Rd_tag', {#@testing Rd_indent for Rd_tag
                 , .check=FALSE
                 )[2:3]
     expect_identical( format(Rd_indent(rd, '             ', indent.first = FALSE))
-                    ,"\\description{a description without" %\%
-                      "             a leading newline}")
+                    , "\\description{a description without" %\%
+                      "             a leading newline" %\%
+                      "}")
     expect_identical( Rd_indent(rd, .Rd.default.indent, no.first = FALSE)
                     , Rd_tag('\\description'
                             , Rd_text("  a description without\n")
@@ -72,12 +73,12 @@ test_that('Rd_indent for Rd_tag', {#@testing Rd_indent for Rd_tag
                             , .check=FALSE
                             )[2:3] )
 })
-#line 180 "R/indent.R"
+#line 182 "R/indent.R"
 test_that('Rd_indent errors', {#@testing Rd_indent errors
     expect_error(Rd_indent('hello'), class="Rd-error-assertion failure")
     expect_error(Rd_indent(Rd_text('hello')), class="Rd-error-assertion failure")
 })
-#line 184 "R/indent.R"
+#line 186 "R/indent.R"
 test_that('Rd_indent expected output.', {#@testing Rd_indent expected output.
     val <- Rd_indent(Rd(Rd_text('hello')), .Rd.default.indent)
     expect_identical(val, .Rd(Rd_text('  hello')))
@@ -96,11 +97,11 @@ test_that('Rd_indent expected output.', {#@testing Rd_indent expected output.
     expect_equal( tail(head(as.character(.Rd(val)), -1), -3)
                 , paste0(ifelse(x == '', '', '  '), x, '\n'))
 })
-#line 202 "R/indent.R"
+#line 204 "R/indent.R"
 test_that('with parsed Rd', {#@testing with parsed Rd
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd'))
     txt <- Rd_rm_srcref(txt)
-    x <- txt[['\\examples']]
+    x <- Rd_get_element(txt, '\\examples')
 
     val <- Rd_indent(x, indent.with = Rd_rcode("    "))
     expect_Rd_tag(val, '\\examples')
@@ -110,7 +111,7 @@ test_that('with parsed Rd', {#@testing with parsed Rd
                     )
     expect_equal(length(val), length(x))
 
-    x <- txt[['\\arguments']][[9]]
+    x <- Rd_get_element(txt, "\\arguments")[[9]]
     val <- Rd_indent(x, indent.with='  ')
     expect_Rd_tag(val, '\\item')
     exp <- s(.Rd( Rd(Rd_text('n'))
@@ -120,13 +121,13 @@ test_that('with parsed Rd', {#@testing with parsed Rd
     exp <- Rd_canonize_text(exp)
     expect_identical(val, exp)
 
-    x <- Rd_untag(txt[['\\arguments']][8:10])
+    x <- Rd_untag(Rd_get_element(txt, "\\arguments")[8:10])
     val <- Rd_indent(x, indent=TRUE, indent.with='  ', no.first=TRUE)
     expect_equal(format(val)
                 , "  \\item{n}{number of observations. If \\code{length(n) > 1}, the length" %\%
                   "      is taken to be the number required.}\n" )
 
-    x <- txt[['\\arguments']]
+    x <- Rd_get_element(txt, "\\arguments")
     val <- Rd_indent(x, indent=TRUE, indent.with='  ')
     expect_equal( format(val)
                 , "\\arguments{" %\%

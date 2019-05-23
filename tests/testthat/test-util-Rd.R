@@ -20,18 +20,7 @@ test_that('cleanup utilities.', {#@testing cleanup utilities.
     expect_equal(get_Rd_tag(txt[[1]]), "COMMENT")
     expect_null(get_Rd_tag(Rd_untag(txt[[1]])))
 })
-#line 47 "R/util-Rd.R"
-test_that('Rd_lines', {#@testing
-    l <- list( Rd_rcode("value \\%if\\% proposition")
-             , Rd_rcode("proposition \\%otherwise\\% alternate")
-             , Rd_rcode('')
-             )
-    exp <- Rd( Rd_rcode("value \\%if\\% proposition\n")
-             , Rd_rcode("proposition \\%otherwise\\% alternate\n"))
-    val <- Rd_lines(l)
-    expect_identical(val, exp)
-})
-#line 70 "R/util-Rd.R"
+#line 50 "R/util-Rd.R"
 test_that('ensure_ends_with_newline', {#@testing
     expect_identical( ensure_ends_with_newline(Rd_text("testing"))
                     , Rd_text("testing\n"))
@@ -58,4 +47,20 @@ test_that('ensure_ends_with_newline', {#@testing
                     , list( Rd_rcode("testing()\n")
                           , Rd_rcode("test_me()\n")
                           ))
+})
+#line 122 "R/util-Rd.R"
+test_that('Rd_compact', {#@testing
+    l <- list( Rd_text('testing ')
+             , Rd_code('Rd_compact()')
+             , Rd(' with a list of Rd objects.')
+             )
+    expect_is_exactly(l[[1]], 'Rd_string')
+    expect_is_exactly(l[[2]], 'Rd_tag')
+    expect_is_exactly(l[[3]], 'Rd')
+    val <- Rd_compact(l)
+    expect_length(val, 3)
+    expect_is_exactly(val, 'Rd')
+    expect_is_exactly(val[[1]], 'Rd_string')
+    expect_is_exactly(val[[2]], 'Rd_tag')
+    expect_is_exactly(val[[3]], 'Rd_string')
 })

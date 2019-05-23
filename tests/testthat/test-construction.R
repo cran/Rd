@@ -80,7 +80,7 @@ test_that('check_content(., .check=TRUE)', {#@testing check_content(., .check=TR
                                     , .check=TRUE)
                 , "Elements 1, 2 of elements.are.valid are not true")
 })
-#line 193 "R/construction.R"
+#line 209 "R/construction.R"
 test_that('Rd_text', {#@testing
     val <- Rd_text('testing')
     expect_is_exactly(val, 'Rd_string')
@@ -111,22 +111,22 @@ test_that('Rd_text', {#@testing
     expect_is(x, 'Rd_string')
     expect_length(x, 1L)
 })
-#line 232 "R/construction.R"
+#line 248 "R/construction.R"
 test_that('Rd_rcode', { #@testing
     val <- Rd_rcode('1+1==2')
     expect_identical(val, s('1+1==2', Rd_tag='RCODE', class='Rd_string'))
 })
-#line 249 "R/construction.R"
+#line 265 "R/construction.R"
 test_that('Rd_symb', { #@testing
     val <- Rd_symb('name')
     expect_identical(val, s('name', Rd_tag='VERB', class='Rd_string'))
 })
-#line 267 "R/construction.R"
+#line 283 "R/construction.R"
 test_that('Rd_rcode, Rd_symb, and Rd_comment', {#@testing Rd_rcode, Rd_symb, and Rd_comment
     expect_error(Rd_comment("testing"), "Ill-formed comment", class = "Rd-error-assertion failure")
     expect_true(is_Rd_string(Rd_comment("% comment"), "COMMENT", strict = TRUE))
 })
-#line 330 "R/construction.R"
+#line 346 "R/construction.R"
 test_that('Rd', {#@testing
     a <- "test"
     expect_message( b <- Rd(a, verbose=TRUE)
@@ -167,14 +167,14 @@ test_that('Rd', {#@testing
     expect_length(x, 1)
     expect_true(all(are_Rd_strings(x, 'TEXT')))
 })
-#line 376 "R/construction.R"
+#line 392 "R/construction.R"
 test_that('Class-Rd', {#@testing Class-Rd
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd'))
     expect_is(txt, 'Rd')
     expect_true(is_valid_Rd_object(txt))
     expect_true(validObject(txt, TRUE, complete = FALSE))
 })
-#line 455 "R/construction.R"
+#line 466 "R/construction.R"
 test_that('Rd_tag', {#! @testing
     expect_error(Rd_tag(NULL, 'test'), "tag is not a string")
     expect_error(Rd_tag(c('a', 'b'), 'test'), "tag is not a string")
@@ -196,7 +196,7 @@ test_that('Rd_tag', {#! @testing
     expect_error(Rd_tag('name', Rd_text('my name'), .check = TRUE)
                 , class="Rd-error-invalid Rd tag" )
 })
-#line 476 "R/construction.R"
+#line 487 "R/construction.R"
 test_that('Rd_tag', {#@testing
     x <- Rd_tag('\\item', Rd(Rd_text('arg')), Rd(Rd_text("an agrument")))
     expect_length(x, 2L)
@@ -207,7 +207,7 @@ test_that('Rd_tag', {#@testing
     expect_is(val, 'Rd_tag')
     expect_identical(format(val), "\\link[pkg]{dest}")
 })
-#line 486 "R/construction.R"
+#line 497 "R/construction.R"
 test_that('Rd_tag(indent=TRUE)', {#@testing Rd_tag(indent=TRUE)
     val <- Rd_tag('\\description'
                  , Rd_text('line 1\n')
@@ -231,13 +231,27 @@ test_that('Rd_tag(indent=TRUE)', {#@testing Rd_tag(indent=TRUE)
                       "}"
                     )
 })
-#line 516 "R/construction.R"
+#line 527 "R/construction.R"
 test_that('validObject(Rd_tag)', {#@testing validObject(Rd_tag)
     txt <- tools::parse_Rd(system.file("examples", "Normal.Rd", package = 'Rd'))
     expect_is(txt, 'Rd')
 
-    desc <- txt[['\\description']]
+    desc <- Rd_get_element(txt, '\\description')
     expect_Rd_tag(desc, '\\description')
     expect_true(is_valid_Rd_object(desc))
     expect_true(validObject(desc, TRUE))
+})
+#line 536 "R/construction.R"
+test_that('Rd_tag edge case all elements are Rd.', {#@testing Rd_tag edge case all elements are Rd.
+    content <- collapse(strwrap(stringi::stri_rand_lipsum(1), 72), '\n')
+    rd <- Rd_tag( "\\section"
+                , content = list( Rd("Title")
+                                , Rd(content)
+                                )
+                )
+    expect_Rd_tag(rd, '\\section')
+    expect_Rd_bare(rd[[1]])
+    expect_Rd_bare(rd[[2]])
+    expect_true(head(rd[[2]], 1) == '\n')
+    expect_true(tail(rd[[2]], 1) != '\n')
 })

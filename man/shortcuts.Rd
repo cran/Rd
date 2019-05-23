@@ -10,8 +10,10 @@
 \alias{Rd_concept}
 \alias{Rd_concepts}
 \alias{Rd_description}
+\alias{Rd_enumerate}
 \alias{Rd_examples}
 \alias{Rd_item}
+\alias{Rd_itemize}
 \alias{Rd_keyword}
 \alias{Rd_keywords}
 \alias{Rd_name}
@@ -37,9 +39,15 @@ Rd_concepts(concepts)
 
 Rd_description(..., content = Rd(...))
 
+Rd_enumerate(..., items = list(...), indent = getOption("Rd::indent",
+  TRUE), indent.with = getOption("Rd::indent.with", "  "))
+
 Rd_examples(..., content = list(...))
 
 Rd_item(item, description = NULL)
+
+Rd_itemize(..., items = list(...), indent = getOption("Rd::indent",
+  TRUE), indent.with = getOption("Rd::indent.with", "  "))
 
 Rd_keyword(key, .check = TRUE)
 
@@ -118,9 +126,13 @@ In some cases additional compliance checks are included.
 
 \item \code{Rd_description}: Create a description tag.
 
+\item \code{Rd_enumerate}: Create an enumerated list.
+
 \item \code{Rd_examples}: Create an examples tag.
 
 \item \code{Rd_item}: Create an item tag.
+
+\item \code{Rd_itemize}: Create an itemized list.
 
 \item \code{Rd_keyword}: Create a keyword tag.
 
@@ -136,7 +148,13 @@ In some cases additional compliance checks are included.
 }}
 
 \examples{
+Rd_enumerate(Rd_item("first"), Rd_item("second"))
+Rd_enumerate( Rd_item("first", "comes before second.")
+            , Rd_item("second", "comes after first."))
 Rd_item("an item")
 Rd_item('a', 'the first letter of the alphabet.')
+Rd_itemize(Rd_item("first"), Rd_item("second"))
+Rd_itemize( Rd_item("first", "comes before second.")
+          , Rd_item("second", "comes after first."))
 Rd_keyword('documentation')
 }

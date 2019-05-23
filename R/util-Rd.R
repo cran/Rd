@@ -34,26 +34,6 @@ if(FALSE){#@testing cleanup utilities.
     expect_null(get_Rd_tag(Rd_untag(txt[[1]])))
 }
 
-Rd_lines <- function(l, ...){
-    assert_that(is_valid_Rd_list(l))
-    val <- if (all(are_Rd_strings(l, 'RCODE')))
-            Rd_canonize(cl(undim(rbind(l, .Rd(Rd_rcode("\n")))), 'Rd'), ...)
-        else
-            Rd_canonize(cl(undim(rbind(l, .Rd(Rd_text("\n")))), 'Rd'), ...)
-    if (tail(val, 1L)=='\n')
-        val <- head(val, -1L)
-    return(val)
-}
-if(FALSE){#@testing
-    l <- list( Rd_rcode("value \\%if\\% proposition")
-             , Rd_rcode("proposition \\%otherwise\\% alternate")
-             , Rd_rcode('')
-             )
-    exp <- Rd( Rd_rcode("value \\%if\\% proposition\n")
-             , Rd_rcode("proposition \\%otherwise\\% alternate\n"))
-    val <- Rd_lines(l)
-    expect_identical(val, exp)
-}
 
 ensure_ends_with_newline <- function(rd, .check=TRUE){
     if (is.list(rd)){
@@ -113,4 +93,44 @@ expect_Rd_bare <- function(object, info=NULL, label = NULL){
     act <- testthat::quasi_label(rlang::enquo(object), label)
     val <- see_if(is_Rd(object, strict=TRUE))
     testthat::expect(val, act$label %<<% attr(val, 'msg'), info)
+}
+
+
+
+#' Compact a list into an Rd vector
+#'
+#' When creating Rd from other objects it is common to
+#' iterate over a vector or list and convert each [to Rd](toRd())
+#' then combine the results. However [toRd()] can return an [Rd_string],
+#' [Rd_tag], or an [Rd] container. to combine these together
+#' intelligently, use `Rd_compact` which converts each to an Rd
+#' container, placing strings and tags in a container, then
+#' concatenating all together.
+#'
+#' @param l list of Rd objects.
+#'
+#' @export
+Rd_compact <- function(l){
+    assert_that( is.list(l)
+               , all(purrr::map_lgl(l, is_valid_Rd_object))
+               )
+    if (is(l, 'Rd_tag')) return(.Rd(l))
+    for (i in seq_along(l)) if (!is_exactly(l[[i]], 'Rd'))
+        l[[i]] <- .Rd(l[[i]])
+    cl(unlist(l, recursive = FALSE), 'Rd')
+}
+if(FALSE){#@testing
+    l <- list( Rd_text('testing ')
+             , Rd_code('Rd_compact()')
+             , Rd(' with a list of Rd objects.')
+             )
+    expect_is_exactly(l[[1]], 'Rd_string')
+    expect_is_exactly(l[[2]], 'Rd_tag')
+    expect_is_exactly(l[[3]], 'Rd')
+    val <- Rd_compact(l)
+    expect_length(val, 3)
+    expect_is_exactly(val, 'Rd')
+    expect_is_exactly(val[[1]], 'Rd_string')
+    expect_is_exactly(val[[2]], 'Rd_tag')
+    expect_is_exactly(val[[3]], 'Rd_string')
 }
